@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+  
+
+    <settings>
+        <setting name="lazyLoadingEnabled" value="false" />
+        <setting name="cacheEnabled" value="false" />
+    </settings>
+
+	<!-- 别名 -->
+	 <!--  <typeAliases> 
+	     <typeAlias type="com.lcg.common.Page" alias="page"/>
+	     <typeAlias type="com.lcg.entity.User" alias="user"/>
+	     <typeAlias type="com.lcg.entity.Menu" alias="menu"/>
+	  </typeAliases>  -->
+<!-- 
+    <plugins>
+        <plugin interceptor="com.lcg.common.ItsMeQueryInterceptor">       
+            <property name="databaseType" value="mysql"/>
+        </plugin>
+    </plugins> -->
+  
+  
+  
+  
+ <!-- MyBatis配置文件 --> 
+  <mappers>    
+     <mapper resource="/mapper/testMapper.xml"/>
+  </mappers>
+  
+</configuration>

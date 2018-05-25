@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                           http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+                           http://www.springframework.org/schema/aop
+                           http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+                           http://www.springframework.org/schema/tx 
+                           http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+                           http://www.springframework.org/schema/context 
+                           http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+        
+        <!-- 扫描包结构 -->      
+        <context:component-scan base-package="com.steam.dao.**"/>
+        
+   <!--      <bean id="propertiesConfig" class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer">
+          
+           <property name="locations">
+              <list> 
+                <value>classpath*:/datasource.properties</value>
+              </list>
+           </property>
+        </bean> -->
+        
+     <!-- 通过该配置可以直接在代码中获取properties的值 -->
+     <bean id="configProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>classpath*:/datasource.properties</value>
+            </list>
+        </property>
+       </bean>
+
+     <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer">
+        <property name="properties" ref="configProperties" />
+     </bean>
+        
+        
+        <!-- 配饰数据源 --> 
+     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+       <property name="driverClassName" value="${jdbc.driver}"></property>
+       <property name="url" value="${jdbc.url}"></property>
+       <property name="username" value="${jdbc.username}"></property>
+       <property name="password" value="${jdbc.password}"></property>
+    </bean> 
+    
+       <!-- 配置事务 -->  
+   <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+       <property name="dataSource" ref="dataSource"/>
+   </bean>  
+   
+   <!-- 配置添加事务的方法，的切面-->  
+   <tx:advice id="transactionAdvice" transaction-manager="transactionManager">
+      <tx:attributes>
+          <tx:method name="put*" propagation="REQUIRED"  read-only="false"/>
+          <tx:method name="insert*" propagation="REQUIRED" read-only="false"/>
+          <tx:method name="update*" propagation="REQUIRED" read-only="false"/>
+          <tx:method name="delete*" propagation="REQUIRED" read-only="false"/>
+          <tx:method name="save*" propagation="REQUIRED" read-only="false"/>
+          <tx:method name="edit*" propagation="REQUIRED" read-only="false"/>
+          
+          <tx:method name="*" propagation="REQUIRED"/>
+      </tx:attributes>
+   </tx:advice>
+   
+   
+    <!-- 组装事务 -->
+   <aop:config>
+       <aop:pointcut expression="(execution(* com.steam.service.**.*Service.*(..)))" id="pc"/><!-- 配饰切入点表达式 -->
+       <aop:advisor advice-ref="transactionAdvice" pointcut-ref="pc"/>
+   </aop:config>  
+   
+   
+   
+   <!-- 整合Mybatis --> 
+   <bean id="sessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+       <property name="dataSource" ref="dataSource"/>
+       <property name="configLocation" value="classpath:/mybatis-config.xml"/>
+   </bean>  
+     
+   <!-- dao接口mapping所在的包名 ,spring会自动查找其下边的类-->
+   <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+      <property name="sqlSessionFactoryBeanName" value="sessionFactory"/>
+      <property name="basePackage" value="com.steam.dao.**" /><!-- 配置基本的Dao包路径 -->
+   </bean>   
+           
+    <!-- 定时任务 -->       
+    <import resource="classpath*:spring-quartz.xml"/>       
+    
+ </beans>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+       xsi:schemaLocation="http://www.springframework.org/schema/beans 
+                           http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+                           http://www.springframework.org/schema/aop
+                           http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+                           http://www.springframework.org/schema/tx 
+                           http://www.springframework.org/schema/tx/spring-tx-4.0.xsd
+                           http://www.springframework.org/schema/context 
+                           http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+        
+        <context:component-scan base-package="com.steam.dao.**"/>
+
+        <!-- 作业类 -->
+        <bean id="jobClass"  class="com.steam.quartz.MyJobClass"/>
+        
+        <!-- 任务执行的方法testJob -->
+        <bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+              <property name="targetObject" ref="jobClass"/>
+              <property name="targetMethod" value="testJob"></property>
+              <property name="concurrent" value="false"></property>
+        </bean>
+        
+           
+        <!-- 定时触发器 -->
+        <bean id="cronTrigger"  class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">  
+             <property name="jobDetail" ref="jobDetail" />  
+             <property name="cronExpression" value="0/1 * * ? * *" />   
+        </bean> 
+        
+        <!-- 任务调度工厂配置 -->
+        <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+             <property name="jobDetails">
+                 <list>
+                    <ref bean="jobDetail"/>
+                 </list>
+             </property>
+             <property name="triggers">
+                 <list>
+                     <ref bean="cronTrigger"/>
+                 </list>
+             </property>
+        </bean>
+ </beans>
